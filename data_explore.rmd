@@ -1,0 +1,57 @@
+---
+title: "Data Explore"
+author: "Aaron Gould, Lila Craveiro, Danielle Freshwaters"
+date: "11/10/2019"
+output:
+  html_document:
+    keep_md: yes
+---
+
+```{r}
+library(tidyverse)
+library(broom)
+library(faraway) #NEW! Be sure to install this package!
+library(Sleuth3) #NEW! Need to install this to access the data!
+library(GGally)
+library(tidyverse)
+library(ggridges)
+library(fivethirtyeight)
+```
+
+
+## Cabinet Turnover Data
+```{r}
+ggplot(cabinet_turnover) + geom_boxplot(aes(x=president, y= length))
+```
+We are curious to see how the length each appointee spends at their position
+depends on the president in office. In the future we will take in to account the
+terms each president served and the days that our current president  is in
+office. Without taking that into account we can se that Obama had the highest
+median for length of apointee spent in cabinet position.
+```{r}
+ggplot(cabinet_turnover) + geom_jitter(aes(x=president, y= days))
+```
+We are interested in examining what happened during the date that we see
+clusters of appointees leaving their position. We would like to examine, outside
+of this data set, what events occured to cause this. We noticed that most
+appointees leave at either 4 years or 8 years into the presidency.
+
+## SPI Global Rankings
+
+```{r}
+
+ggplot(spi_global_rankings) +
+  geom_point(aes(x=rank, y=spi))
+
+```
+
+As we guessed the better ranked teams have higher SPI rankings. The relationship is not linear. We wonder if one influences the other or if they are independent.
+
+```{r}
+spi_global_rankings %>% 
+  filter(league == "Barclays Premier League" | league == "German Bundesliga" | league == "Italy Serie A" | league == "Major League Soccer") %>% 
+  ggplot() +
+  geom_boxplot(aes(x=league, y=spi))
+```
+
+We chose 4 of the many leagues to examine in an initial observation. We wanted to compare some of the most premier European leagues agaisnt the MLS. We can see not even the best MLS teams have better SPI scores than the worst of these European leagues. 
