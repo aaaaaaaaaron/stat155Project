@@ -7,7 +7,7 @@ output:
     keep_md: yes
 ---
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(broom)
 library(faraway) #NEW! Be sure to install this package!
