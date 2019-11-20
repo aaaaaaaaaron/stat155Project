@@ -1,0 +1,100 @@
+---
+title: "Project Document"
+author: "Aaron Gould, Lila Craveiro, Danielle Freshwaters"
+date: "11/20/2019"
+output:
+  html_document:
+    keep_md: yes
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(broom)
+library(faraway) #NEW! Be sure to install this package!
+library(Sleuth3) #NEW! Need to install this to access the data!
+library(GGally)
+library(tidyverse)
+library(ggridges)
+library(fivethirtyeight)
+```
+
+
+## Cabinet Turnover Data
+
+1.) Introduce your data and research question. Make sure you include a graph/table that summarizes the response variable. Tell us about the important predictor variables you will be evaluating.
+
+```{r}
+ggplot(cabinet_turnover) + geom_boxplot(aes(x=president, y= length))
+```
+We are curious to see how the length each appointee spends at their position
+depends on the president in office. In the future we will take in to account the
+terms each president served and the days that our current president  is in
+office. Without taking that into account we can se that Obama had the highest
+median for length of apointee spent in cabinet position.
+
+
+```{r}
+ggplot(cabinet_turnover) + geom_jitter(aes(x=president, y= days))
+```
+We are interested in examining what happened during the date that we see
+clusters of appointees leaving their position. We would like to examine, outside
+of this data set, what events occured to cause this. We noticed that most
+appointees leave at either 4 years or 8 years into the presidency.
+
+We are choosing length as our response variable. Our predictors will be President, position, start.
+We already have a graph for president.
+
+```{r}
+ggplot(cabinet_turnover) + geom_boxplot(aes(x=position, y= length))
+
+```
+
+I wanted to see how many only had one.
+
+```{r}
+cabinet_turnover %>% 
+  count(position)
+```
+
+There are too many cabinet positions so we are picking these few to analyze:
+
+Secretary of Homeland Security
+EPA Administrator
+Secretary of Health & Human Services
+Secretary of Education
+Secretary of Defense
+Secretary of Labor
+Chief of Staff
+
+```{r}
+specified_cabinet_turnover <- cabinet_turnover %>% 
+    filter(position == "Secretary of Homeland Security" | position == "EPA Administrator" | position == "Secretary of Health & Human Services" | position == "Secretary of Education" | position == "Secretary of Defense" | position == "Secretary of Labor" | position == "Chief of Staff")
+```
+
+```{r}
+ggplot(specified_cabinet_turnover) + geom_boxplot(aes(x=position, y=length))
+```
+
+```{r}
+cabinet_turnover %>% 
+  ggplot() +
+  geom_point(aes(x=days, y=length))
+```
+
+This doesn't tell us much but it is interesting.
+
+```{r}
+cabinet_turnover %>% 
+  ggplot() +
+  geom_point(aes(x=days - length, y=length))
+```
+
+#```{r}
+ //cabinet_turnover %>% 
+  augment(startindays = days-length) %>% 
+  ggplot() +
+  geom_point(aes(x=startindays, y=length)) + 
+  x_label()
+```
+
+
