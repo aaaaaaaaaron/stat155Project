@@ -80,16 +80,42 @@ new_cabinet_turnover %>%
 This shows that the later into the president's term the appointee started, the shorter the length of their tenure.  The two downward angled lines of points represent those cases that served the maximum length available to them (within the four or eight year term).  
 
 ```{r}
-administration_days <- tibble(president = unique(cabinet_turnover$president), admin_total_days = c(1460, 2920, 1460, 2920, 2920, 2920, 730))
+administration_days <- tibble(president = unique(new_cabinet_turnover$president), admin_total_days = c(1460, 2920, 1460, 2920, 2920, 2920, 730))
+
+jointdataset <- full_join(new_cabinet_turnover, administration_days, by = "president")
+jointdatasetspecified <- full_join(specified_cabinet_turnover, administration_days, by = "president")
 ```
 
 
 ```{r}
-new_cabinet_turnover %>% 
+length_prop_dataset <- jointdataset %>% 
   mutate(length_proportion = length/(admin_total_days - (days_into_term_start)))
+
+length_prop_dataset  %>% 
+  select("president", "appointee", "admin_total_days", "length_proportion")
 ```
 
+```{r}
+ggplot(length_prop_dataset) + geom_boxplot(aes(x=president, y= length_proportion))
+```
 
+```{r}
+length_prop_dataset_specified <- jointdatasetspecified %>% 
+  mutate(length_proportion = length/(admin_total_days - (days - length))) %>% 
+  select("president", "position", "length_proportion")
+
+length_prop_dataset_specified
+```
+
+```{r}
+ggplot(length_prop_dataset_specified) + geom_boxplot(aes(x=position, y=length_proportion))
+```
+
+```{r}
+length_prop_dataset %>% 
+  ggplot() +
+  geom_point(aes(x=days_into_term_start, y=length_proportion))
+```
 
 *look at data within one president?  
 
