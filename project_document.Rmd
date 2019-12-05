@@ -23,7 +23,7 @@ library(fivethirtyeight)
 
 1) Introduce your data and research question. Make sure you include a graph/table that summarizes the response variable. Tell us about the important predictor variables you will be evaluating.
 
-Question: We will be analyzing the data set **cabinet_turnover** from the **fivethirtyeight** package.  This data set includes variables taken from 7 different presidencies, from Jimmy Carter to Donald Trump, summarizing turnover in each of their cabinets.  Our question is: What factors effect the length of an appointee's cabinet tenure?  We will be evaluating how *position* (the cabinet position), *president* (the sitting president), and a variable of our own creation *XXX* (number of days into the administration the appointee started) affect *length_proportion* (another variable we created that gives us the proportion of *length* to the total number of days an appointee could have served).  
+Question: We will be analyzing the data set **cabinet_turnover** from the **fivethirtyeight** package.  This data set includes variables taken from 7 different presidencies, from Jimmy Carter to Donald Trump, summarizing turnover in each of their cabinets.  It was collected from the Federal Government Website News Reports.  Our question is: What factors effect the length of an appointee's cabinet tenure?  We will be evaluating how *position* (the cabinet position), *president* (the sitting president), and a variable of our own creation *days_into_term_start* (number of days into the administration the appointee started) affect *length_proportion* (another variable we created that gives us the proportion of *length* to the total number of days an appointee could have served).  
 
 2) Exploratory work and basic models
 
@@ -31,15 +31,6 @@ Question: We will be analyzing the data set **cabinet_turnover** from the **five
 ggplot(cabinet_turnover) + geom_boxplot(aes(x=president, y= length))
 ```
 We are curious to see how the length each appointee spends in their position depends on the president in office. We will need to take in to account the number of terms each president served and the time that our current president has been in office (this data was taken at Trump's midterm). Without taking that into account we can se that Obama had the highest median for the length an appointee spent in their cabinet position.    
-
-
-```{r}
-ggplot(cabinet_turnover) + geom_jitter(aes(x=president, y= days))
-```
-We are interested in examining what happened during the dates that we see clusters of appointees leaving their position. We would like to examine, outside of this data set, what events occured to cause this. We noticed that most appointees leave at either 4 years or 8 years into the presidency.
-
-
-***I think we can get rid of this graph??  
 
 
 ```{r}
@@ -72,20 +63,21 @@ specified_cabinet_turnover <- cabinet_turnover %>%
 ggplot(specified_cabinet_turnover) + geom_boxplot(aes(x=position, y=length))
 ```
 
+New variable: the number of days into the president's term that the appointee started  
 
 ```{r}
-cabinet_turnover %>% 
-  ggplot() +
-  geom_point(aes(x=days, y=length))
+new_cabinet_turnover <- cabinet_turnover %>% 
+  mutate(days_into_term_start = days - length)
 ```
 
-This doesn't tell us much but it is interesting.  
 
 ```{r}
-cabinet_turnover %>% 
+new_cabinet_turnover %>% 
   ggplot() +
-  geom_point(aes(x=days - length, y=length))
+  geom_point(aes(x=days_into_term_start, y=length))
 ```
+
+This shows that the later into the president's term the appointee started, the shorter the length of their tenure.  The two downward angled lines of points represent those cases that served the maximum length available to them (within the four or eight year term).  
 
 ```{r}
 administration_days <- tibble(president = unique(cabinet_turnover$president), admin_total_days = c(1460, 2920, 1460, 2920, 2920, 2920, 730))
@@ -93,17 +85,15 @@ administration_days <- tibble(president = unique(cabinet_turnover$president), ad
 
 
 ```{r}
-cabinet_turnover %>% 
-  mutate(length_proportion = length/(admin_total_days - (days - length)))
+new_cabinet_turnover %>% 
+  mutate(length_proportion = length/(admin_total_days - (days_into_term_start)))
 ```
 
-days-length
-*somehow relate to the possible length they could have been there
-(proportion of the days of available term that they served) - use this as response?
 
-*look at data within one president?
 
-3) Final models, interpretations, and hypothesis tests  
+*look at data within one president?  
+
+3) Models, interpretations, and hypothesis tests  
 
 4) Summary of results  
 
