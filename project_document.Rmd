@@ -13,9 +13,9 @@ library(broom)
 library(faraway) #NEW! Be sure to install this package!
 library(Sleuth3) #NEW! Need to install this to access the data!
 library(GGally)
-library(tidyverse)
 library(ggridges)
 library(fivethirtyeight)
+library(moderndive)
 ```
 
 
@@ -87,6 +87,9 @@ jointdatasetspecified <- full_join(specified_cabinet_turnover, administration_da
 ```
 
 
+*length_proportion* is the proportion of *length* to the total number of days an appointee could have served. For example...
+
+
 ```{r}
 length_prop_dataset <- jointdataset %>% 
   mutate(length_proportion = length/(admin_total_days - (days_into_term_start)))
@@ -117,10 +120,98 @@ length_prop_dataset %>%
   geom_point(aes(x=days_into_term_start, y=length_proportion))
 ```
 
-*look at data within one president?  
 
 3) Models, interpretations, and hypothesis tests  
 
+```{r}
+lm_president <- lm(length_proportion ~ president, data = length_prop_dataset)
+
+get_regression_table(lm_president)
+```
+
+Intercept: The average *length_proportion* of an appointee under the Bush41 administration  
+presidentBush43 coefficient: The difference in *length_proportion* for an appointee between Bush41 and Bush43 on average  
+
+```{r}
+lm_position <- lm(length_proportion ~ position, data = length_prop_dataset_specified)
+
+get_regression_table(lm_position)
+```
+
+Intercept: The average *length_proportion* of a Chief of Staff appointee  
+positionEPAadministrator: The difference in *length_proportion* between Chief of Staff and EPA Administrator on average  
+
+```{r}
+lm_startdate <- lm(length_proportion ~ days_into_term_start, data = length_prop_dataset)
+
+get_regression_table(lm_startdate)
+```
+
+The estimate for the *days_into_start* coefficent, and the p-value, is 0.  This reinforces what we could see in the graph, that there is no relationship between *days_into_start* and *length_proportion*.  In other words, the length of an appointee's tenure does not depend on how far into the president's administration they started.  
+
+```{r}
+lm_president_position <- lm(length_proportion ~ president*position, data = length_prop_dataset_specified)
+
+get_regression_table(lm_president_position)
+```
+
+Intercept: The average *length_proprtion* for a Chief of Staff appointee under the Bush41 administration  
+presidentBush43:positionEPAadministrator: The average change in *length_proportion* between a Chief of Staff appointee and EPA Administrator from Bush41 to Bush43  
+
+$$
+H_0: \beta_1 = \beta_2 = \beta_3 = \beta_4 = 0 \\
+H_a: \text{at least one of the } \beta_i \ne 0
+$$
+
+$H_0$: All coefficients are equal to 0, there is no relationship between *president* and *length_proportion*  
+
+$H_a$: At least one coefficient is not equal to 0, there is a relationship between *president* and *length_proportion*  
+
+```{r}
+glance(lm_president) %>% select(r.squared)
+
+r_squared_actual <- glance(lm_president) %>% select(r.squared) %>% pull()
+```
+
+```{r}
+mod_no_relationship <- lm(length_proportion ~ sample(president), data=length_prop_dataset)
+tidy(mod_no_relationship)
+glance(mod_no_relationship) %>% select(r.squared)
+```
+
+```{r}
+set.seed(100)
+
+r_squared <- length_prop_dataset %>% 
+  rep_sample_n(size = 312, replace = FALSE, reps = 200) %>% 
+  group_by(replicate) %>% 
+  do(lm(length_proportion ~ sample(president), data = .) %>% glance()) %>% 
+  select(replicate, r.squared)
+
+r_squared
+```
+
+```{r}
+r_squared %>% 
+  ggplot(aes(x=r.squared)) +
+  geom_histogram(bins = 20) +
+  geom_vline(xintercept = 0.08052376, color="red")
+```
+
+This shows that we can reject the null hypothesis.  None of the simulated r.squared values are as extreme as the actual r.squared value.  There is then some relationship between *president* and *length_proportion*.  However, the difference between the most extreme simulated r.squared value and the actual is not significantly large.  
+
 4) Summary of results  
+
+- we found that *president* has the most significant effect on *length_proportion*, and that *days_into_term_start* has no effect  
+- the p-values forthe positions we analyzed were relatively high, indicating little to no relationship between *position* and *length_proportion*, thus we focused on *president*  
+- interesting to apply statistics to a subject that is so commonly discussed and analyzed (politics)  
+- we had to create multiple new variables and datasets because some of the existing variables were recorded in a way that was unhelpful or irrelevant to our analysis  
+- pitfalls included the quantity of positions, and that they weren't all included in every president's administration, some appointees overlapped administrations, there was missing information for some cases (start/end dates)  
+- other variables that would have been interesting to analyze had they been included in the data set are party, age, gender, previous political experience  
+
+
+Next steps: Organize work and make it look nice, add echo=false, look at cases (esp in Trump data) that have n/a, discuss and prepare presentation  
+
+
 
 
