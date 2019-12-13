@@ -1,7 +1,7 @@
 ---
-title: "Project Document"
+title: "Analyzing Cabinet Turnover"
 author: "Aaron Gould, Lila Craveiro, Danielle Freshwaters"
-date: "11/20/2019"
+date: "12/18/2019"
 output:
   html_document:
     keep_md: yes
@@ -10,8 +10,8 @@ output:
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(broom)
-library(faraway) #NEW! Be sure to install this package!
-library(Sleuth3) #NEW! Need to install this to access the data!
+library(faraway) 
+library(Sleuth3) 
 library(GGally)
 library(ggridges)
 library(fivethirtyeight)
@@ -20,8 +20,6 @@ library(moderndive)
 
 
 ## Cabinet Turnover Data
-
-1) Introduce your data and research question. Make sure you include a graph/table that summarizes the response variable. Tell us about the important predictor variables you will be evaluating.
 
 Question: We will be analyzing the data set **cabinet_turnover** from the **fivethirtyeight** package.  This data set includes variables taken from 7 different presidencies, from Jimmy Carter to Donald Trump, summarizing turnover in each of their cabinets.  It was collected from the Federal Government Website News Reports.  Our question is: What factors effect the length of an appointee's cabinet tenure?  We will be evaluating how *position* (the cabinet position), *president* (the sitting president), and a variable of our own creation *days_into_term_start* (number of days into the administration the appointee started) affect *length_proportion* (another variable we created that gives us the proportion of *length* to the total number of days an appointee could have served).  
 
