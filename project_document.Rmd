@@ -10,8 +10,8 @@ output:
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(broom)
-library(faraway) #NEW! Be sure to install this package!
-library(Sleuth3) #NEW! Need to install this to access the data!
+library(faraway) 
+library(Sleuth3) 
 library(GGally)
 library(ggridges)
 library(fivethirtyeight)
@@ -19,27 +19,23 @@ library(moderndive)
 ```
 
 
-## Cabinet Turnover Data
-
-1) Introduce your data and research question. Make sure you include a graph/table that summarizes the response variable. Tell us about the important predictor variables you will be evaluating.
+## Cabinet Turnover Data  
 
 Question: We will be analyzing the data set **cabinet_turnover** from the **fivethirtyeight** package.  This data set includes variables taken from 7 different presidencies, from Jimmy Carter to Donald Trump, summarizing turnover in each of their cabinets.  It was collected from the Federal Government Website News Reports.  Our question is: What factors effect the length of an appointee's cabinet tenure?  We will be evaluating how *position* (the cabinet position), *president* (the sitting president), and a variable of our own creation *days_into_term_start* (number of days into the administration the appointee started) affect *length_proportion* (another variable we created that gives us the proportion of *length* to the total number of days an appointee could have served).  
 
-2) Exploratory work and basic models
 
 *put presidents in choronological order  
 
 ```{r}
-ggplot(cabinet_turnover) + geom_boxplot(aes(x=president, y= length))
+ggplot(cabinet_turnover) + geom_boxplot(aes(x=fct_relevel(president, "Carter", "Reagan", "Bush 41", "Clinton", "Bush 43", "Obama", "Trump"), y= length)) + xlab("president")
 ```
 We are curious to see how the length each appointee spends in their position depends on the president in office. We will need to take in to account the number of terms each president served and the time that our current president has been in office (this data was taken at Trump's midterm). Without taking that into account we can se that Obama had the highest median for the length an appointee spent in their cabinet position.    
 
 
 ```{r}
-ggplot(cabinet_turnover) + geom_boxplot(aes(x=position, y= length)) + coord_flip()
+ggplot(cabinet_turnover) + geom_boxplot(aes(x = fct_reorder(position, length, median), y= length)) + coord_flip() 
 ```
 
-*sort by median length  
 
 I wanted to see how many only had one.
 
@@ -96,14 +92,16 @@ jointdatasetspecified <- full_join(specified_cabinet_turnover, administration_da
 
 ```{r}
 length_prop_dataset <- jointdataset %>% 
-  mutate(length_proportion = length/(admin_total_days - (days_into_term_start)))
+  mutate(length_proportion = length/(admin_total_days - (days_into_term_start)), 
+           chronological_president = fct_relevel(president, "Carter", "Reagan", "Bush 41", "Clinton", "Bush 43", "Obama", "Trump"))
+  
 
 length_prop_dataset  %>% 
   select("president", "appointee", "admin_total_days", "length_proportion")
 ```
 
 ```{r}
-ggplot(length_prop_dataset) + geom_boxplot(aes(x=president, y= length_proportion))
+ggplot(length_prop_dataset) + geom_boxplot(aes(x=chronological_president, y= length_proportion))
 ```
 
 ```{r}
@@ -128,7 +126,7 @@ length_prop_dataset %>%
 3) Models, interpretations, and hypothesis tests  
 
 ```{r}
-lm_president <- lm(length_proportion ~ president, data = length_prop_dataset)
+lm_president <- lm(length_proportion ~ chronological_president, data = length_prop_dataset)
 
 get_regression_table(lm_president)
 ```
@@ -146,9 +144,9 @@ Intercept: The average *length_proportion* of a Chief of Staff appointee
 positionEPAadministrator: The difference in *length_proportion* between Chief of Staff and EPA Administrator on average  
 
 ```{r}
-lm_startdate <- lm(length_proportion ~ days_into_term_start, data = length_prop_dataset)
+lm_startdate <- lm(length_proportion*100 ~ days_into_term_start, data = length_prop_dataset)
 
-get_regression_table(lm_startdate)
+tidy(lm_startdate)
 ```
 
 The estimate for the *days_into_start* coefficent, and the p-value, is 0.  This reinforces what we could see in the graph.  Basically, there is a strong relationship between *days_into_start* and *length_proportion* of nothing.  In other words, the length of an appointee's tenure does not depend on how far into the president's administration they started.  

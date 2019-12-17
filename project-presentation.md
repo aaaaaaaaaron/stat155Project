@@ -9,11 +9,10 @@ output:
 ---
 
 
-
+\
+\
 
 ## Cabinet Turnover Data
-
-\
 \
 \
 **Question:** We will be analyzing the data set **cabinet_turnover** from the **fivethirtyeight** package.  This data set includes variables taken from 7 different presidencies, from Jimmy Carter to Donald Trump, summarizing turnover in each of their cabinets.  It was collected from the Federal Government Website News Reports.  Our question is: **What factors effect the length of an appointee's cabinet tenure?**  We will be evaluating how *position* (the cabinet position), *president* (the sitting president), and a variable of our own creation *days_into_term_start* (number of days into the administration the appointee started) affect *length_proportion* (another variable we created that gives us the proportion of *length* to the total number of days an appointee could have served).  
@@ -21,9 +20,13 @@ output:
 \
 \
 \
+
+### Exploratory Graphs  
 \
 \
 
+### Response Variable: *length*  
+\
 
 ![](project-presentation_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 \
@@ -84,6 +87,10 @@ New variable *length_proportion*: the proportion of *length* to the total number
 \
 \
 
+### Response Variable: *length_proportion*  
+\
+\
+
 
 
 
@@ -117,7 +124,9 @@ New variable *length_proportion*: the proportion of *length* to the total number
 \
 \
 
-# Models
+### Models  
+\
+\
 
 <div data-pagedtable="false">
   <script data-pagedtable-source type="application/json">
@@ -168,7 +177,9 @@ chronological_presidentReagan:positionEPA Administrator: The average change in *
 \
 \
 
-# Hypothesis Tests
+### Hypothesis Tests  
+\
+\
 
 *president* vs. *length_proportion*  
 \
@@ -181,16 +192,10 @@ $$
 
 $H_0$: All coefficients are equal to 0, there is no relationship between *president* and *length_proportion*  
 \
-\
 
 $H_a$: At least one coefficient is not equal to 0, there is a relationship between *president* and *length_proportion*  
 \
 \
-
-
-```
-## Warning: Unknown or uninitialised column: 'term'.
-```
 
 <div data-pagedtable="false">
   <script data-pagedtable-source type="application/json">
@@ -204,11 +209,6 @@ The p-value is about 0.0007, significantly less than 0.05.  This means that we c
 \
 
 Interaction between *president* and *position*  
-
-```
-## Warning: Unknown or uninitialised column: 'term'.
-```
-
 <div data-pagedtable="false">
   <script data-pagedtable-source type="application/json">
 {"columns":[{"label":["res.df"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["rss"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["sumsq"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["statistic"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["p.value"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"67","2":"6.256948","3":"NA","4":"NA","5":"NA","6":"NA"},{"1":"38","2":"4.565619","3":"29","4":"1.691328","5":"0.4854157","6":"0.9766396"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
@@ -221,7 +221,7 @@ The p-value here is very high, about 0.98.  This means that we cannot reject the
 \
 \
 
-# Summary of Results  
+### Summary of Results  
 \
 
 - we found that *president* has the most significant effect on *length_proportion*, and that *days_into_term_start* has very little effect  

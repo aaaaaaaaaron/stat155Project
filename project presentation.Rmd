@@ -5,6 +5,7 @@ date: "12/18/2019"
 output:
   html_document:
     keep_md: yes
+    df_print: paged
 ---
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
@@ -17,21 +18,45 @@ library(ggridges)
 library(fivethirtyeight)
 library(moderndive)
 ```
-
+\
+\
 
 ## Cabinet Turnover Data
-
+\
+\
 **Question:** We will be analyzing the data set **cabinet_turnover** from the **fivethirtyeight** package.  This data set includes variables taken from 7 different presidencies, from Jimmy Carter to Donald Trump, summarizing turnover in each of their cabinets.  It was collected from the Federal Government Website News Reports.  Our question is: **What factors effect the length of an appointee's cabinet tenure?**  We will be evaluating how *position* (the cabinet position), *president* (the sitting president), and a variable of our own creation *days_into_term_start* (number of days into the administration the appointee started) affect *length_proportion* (another variable we created that gives us the proportion of *length* to the total number of days an appointee could have served).  
 
+\
+\
+\
 
-```{r, echo=FALSE}
+### Exploratory Graphs  
+\
+\
+
+### Response Variable: *length*  
+\
+
+```{r, warning=FALSE, echo=FALSE}
 ggplot(cabinet_turnover) + geom_boxplot(aes(x= fct_relevel(president, "Carter", "Reagan", "Bush 41", "Clinton", "Bush 43", "Obama", "Trump"), y= length)) + xlab("president")
 ```
+\
+\
+\
+\
+\
+\
 
 
 ```{r, warning=FALSE, echo=FALSE}
-ggplot(cabinet_turnover) + geom_boxplot(aes(x=fct_reorder(position, length, median), y= length)) + coord_flip()
+ggplot(cabinet_turnover) + geom_boxplot(aes(x=fct_reorder(position, length, median), y= length)) + coord_flip() + xlab("position")
 ```
+\
+\
+\
+\
+\
+\
 
 Clearly, there are too many cabinet positions to be legible, so we are picking these few to analyze:  
 
@@ -43,6 +68,9 @@ Secretary of Defense
 Secretary of Labor  
 Chief of Staff  
 
+\
+\
+
 ```{r, echo=FALSE}
 specified_cabinet_turnover <- cabinet_turnover %>% 
     filter(position == "Secretary of Homeland Security" | position == "EPA Administrator" | position == "Secretary of Health & Human Services" | position == "Secretary of Education" | position == "Secretary of Defense" | position == "Secretary of Labor" | position == "Chief of Staff")
@@ -51,8 +79,17 @@ specified_cabinet_turnover <- cabinet_turnover %>%
 ```{r, warning=FALSE, echo=FALSE}
 ggplot(specified_cabinet_turnover) + geom_boxplot(aes(x=position, y=length)) + coord_flip()
 ```
+\
+\
+\
+\
+\
+\
 
 New variable *days_into_term_start*: the number of days into the president's term that the appointee started  
+
+\
+\
 
 ```{r, echo=FALSE}
 new_cabinet_turnover <- cabinet_turnover %>% 
@@ -65,8 +102,19 @@ new_cabinet_turnover %>%
   ggplot() +
   geom_point(aes(x=days_into_term_start, y=length))
 ```
+\
+\
+\
+\
+\
 
-New variable *length_proportion*: the proportion of *length* to the total number of days an appointee could have served. For example...
+New variable *length_proportion*: the proportion of *length* to the total number of days an appointee could have served. For example...  
+\
+\
+
+### Response Variable: *length_proportion*  
+\
+\
 
 ```{r, echo=FALSE}
 administration_days <- tibble(president = unique(new_cabinet_turnover$president), admin_total_days = c(1460, 2920, 1460, 2920, 2920, 2920, 730))
@@ -84,10 +132,18 @@ length_prop_dataset <- jointdataset %>%
 length_prop_dataset  %>% 
   select("president", "appointee", "admin_total_days", "length_proportion")
 ```
+\
+\
+\
 
 ```{r, warning=FALSE, echo=FALSE}
 ggplot(length_prop_dataset) + geom_boxplot(aes(x=chronological_president, y= length_proportion)) + xlab("president")
 ```
+\
+\
+\
+\
+\
 
 ```{r, echo=FALSE}
 length_prop_dataset_specified <- jointdatasetspecified %>% 
@@ -99,94 +155,139 @@ length_prop_dataset_specified <- jointdatasetspecified %>%
 ```{r, warning=FALSE, echo=FALSE}
 ggplot(length_prop_dataset_specified) + geom_boxplot(aes(x=position, y=length_proportion)) + coord_flip()
 ```
+\
+\
+\
+\
+\
 
 ```{r, warning=FALSE, echo=FALSE}
 length_prop_dataset %>% 
   ggplot() +
   geom_point(aes(x=days_into_term_start, y=length_proportion))
 ```
+\
+\
+\
 
-
-# Models
+### Models  
+\
+\
 
 ```{r, echo=FALSE}
 lm_president <- lm(length_proportion ~ chronological_president, data = length_prop_dataset)
 
 get_regression_table(lm_president)
 ```
+\
 
 Intercept: The average *length_proportion* of an appointee under the Carter administration  
-chronological_presidentReagan coefficient: The difference in *length_proportion* for an appointee between Reagan and Carter on average  
+chronological_presidentReagan coefficient: The difference in *length_proportion* for an appointee between Reagan and Carter on average   
+\
+\
 
 ```{r, echo=FALSE}
 lm_position <- lm(length_proportion ~ position, data = length_prop_dataset_specified)
 
 get_regression_table(lm_position)
 ```
+\
 
 Intercept: The average *length_proportion* of a Chief of Staff appointee  
 positionEPAadministrator: The difference in *length_proportion* between Chief of Staff and EPA Administrator on average  
+\
+\
 
 ```{r, echo=FALSE}
 lm_startdate <- lm(length_proportion*100 ~ days_into_term_start, data = length_prop_dataset)
 
 tidy(lm_startdate)
 ```
+\
 
 Intercept:  The average *length_proportion* as a percentage for all cabinet positions under all presidents   
 The estimate for the *days_into_term_start* coefficient is about 0.015 (as a percent, rather than a decimal).  The p-value is so small, it can be considered 0.  This means that there is a relationship between *days_into_term_start* and *length_proportion* although it is a weak relationship.  
+\
+\
 
 ```{r, echo=FALSE}
 lm_president_position <- lm(length_proportion ~ chronological_president*position, data = length_prop_dataset_specified)
 
 get_regression_table(lm_president_position)
 ```
+\
 
 Intercept: The average *length_proprtion* for a Chief of Staff appointee under the Carter administration  
 chronological_presidentReagan:positionEPA Administrator: The average change in *length_proportion* between a Chief of Staff appointee and EPA Administrator from Carter to Reagan  
+\
+\
+\
 
-# Hypothesis Tests
+### Hypothesis Tests  
+\
+\
 
 *president* vs. *length_proportion*  
+\
+
 $$
 H_0: \beta_1 = \beta_2 = \beta_3 = \beta_4 = 0 \\
 H_a: \text{at least one of the } \beta_i \ne 0
 $$
+\
 
 $H_0$: All coefficients are equal to 0, there is no relationship between *president* and *length_proportion*  
+\
 
 $H_a$: At least one coefficient is not equal to 0, there is a relationship between *president* and *length_proportion*  
+\
+\
 
-
-```{r, echo=FALSE}
+```{r, warning=FALSE, echo=FALSE}
 lm_lengthprop_null <- lm(length_proportion ~ 1, data = length_prop_dataset)
 anova(lm_lengthprop_null, lm_president) %>% tidy()
 ```
+\
 
 The p-value is about 0.0007, significantly less than 0.05.  This means that we can reject the null hypothesis and there is a strong relationship between *president* and *length_proportion*.  
+\
+\
 
 Interaction between *president* and *position*  
-```{r, echo=FALSE}
+```{r, warning=FALSE, echo=FALSE}
 lm_presidentposition_null <- lm(length_proportion ~ chronological_president + position, data = length_prop_dataset_specified)
 
 anova(lm_presidentposition_null, lm_president_position) %>% tidy()
 ```
+\
 
 The p-value here is very high, about 0.98.  This means that we cannot reject the null hypothesis - there could be no interaction between *president* and *position*.  
+\
+\
+\
 
-# Summary of Results  
+### Summary of Results  
+\
 
 - we found that *president* has the most significant effect on *length_proportion*, and that *days_into_term_start* has very little effect  
+\
 
 - the p-values for the positions we analyzed were relatively high, indicating little to no relationship between *position* and *length_proportion*, thus we focused on *president*  
+\
 
 - interesting to apply statistics to a subject that is so commonly discussed and analyzed (politics)  
+\
 
 - we had to create multiple new variables and datasets because some of the existing variables were recorded in a way that was unhelpful or irrelevant to our analysis  
+\
 
 - pitfalls included the quantity of positions, and that they weren't all included in every president's administration, some appointees overlapped administrations, there was missing information for some cases (start/end dates)  
+\
 
 - other variables that would have been interesting to analyze had they been included in the data set are party, age, gender, previous political experience  
+\
+\
+\
 
 
 
